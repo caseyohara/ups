@@ -4,7 +4,7 @@ require 'active_support/all'
 require 'nokogiri'
 require "ups/version"
 require "ups/address"
-
+require "ups/api"
 
 module UPS
   API_URL = "https://onlinetools.ups.com/ups.app/xml/XAV"

@@ -19,74 +19,33 @@ module UPS
     def recommendations
       return [] if valid?
       response['AddressKeyFormat'].map do |recommendation|
-        address = self.class.new
-
-        if recommendation['AddressLine'].kind_of? Array
-          address.address1 = recommendation['AddressLine'][0]
-        else
-          address.address1 = recommendation['AddressLine']
-        end
-
-        address.city = recommendation['PoliticalDivision2']
-        address.state = recommendation['PoliticalDivision1']
-        address.zip = recommendation['PostcodePrimaryLow']
-        address.country = recommendation['CountryCode']
-        address
-      end
-    end
-
-    def request
-      @request ||= begin
-        xml = access_request + address_validation_request
-        Typhoeus::Request.new API_URL,
-                              :body    => xml,
-                              :method  => :post,
-                              :headers => {"Content-type" => "application/x-www-form-urlencoded"}
+        RecommendedAddress.new(recommendation)
       end
     end
 
     def response
-      @response ||= begin
-        hydra = Typhoeus::Hydra.new
-        hydra.queue(request)
-        hydra.run
-        response = request.response
-        Hash.from_xml(response.body)['AddressValidationResponse']
+      @response ||= API::AddressValidationRequest.new(self).response
+    end
+  end
+
+  class RecommendedAddress < Address
+    def initialize(recommendation)
+      address1 = if recommendation['AddressLine'].kind_of? Array
+        recommendation['AddressLine'][0]
+      else
+        recommendation['AddressLine']
       end
-    end
 
-    def access_request
-      @access_request ||= Nokogiri::XML::Builder.new do |xml|
-        xml.AccessRequest("xml:lang" => "en-US") {
-          xml.AccessLicenseNumber API_KEY
-          xml.UserId USER_ID
-          xml.Password PASSWORD
-        }
-      end.to_xml
-    end
+      city = recommendation['PoliticalDivision2']
+      state = recommendation['PoliticalDivision1']
+      zip = recommendation['PostcodePrimaryLow']
+      country = recommendation['CountryCode']
 
-    def address_validation_request
-      @address_validation_request ||= Nokogiri::XML::Builder.new do |xml|
-        xml.AddressValidationRequest("xml:lang" => "en-US") {
-          xml.Request {
-            xml.TransactionReference {
-              xml.CustomerContext
-              xml.XpciVersion 1.0001
-            }
-            xml.RequestAction "XAV"
-            xml.RequestOption "3"
-          }
-          xml.MaximumListSize 3
-          xml.AddressKeyFormat {
-            xml.AddressLine        address1
-            xml.PoliticalDivision2 city
-            xml.PoliticalDivision1 state
-            xml.PostcodePrimaryLow zip
-            xml.CountryCode        country
-          }
-        }
-      end.to_xml
+      super(:address1 => address1,
+            :city => city,
+            :state => state,
+            :zip => zip,
+            :country => country)
     end
-
   end
 end
