@@ -1,9 +1,10 @@
 module UPS
   class Address
-    attr_accessor :address1, :city, :state, :zip, :country
+    attr_accessor :address1, :address2, :city, :state, :zip, :country
 
     def initialize(address={})
       @address1 = address[:address1]
+      @address2 = address[:address2]
       @city = address[:city]
       @state = address[:state]
       @zip = address[:zip]
@@ -36,12 +37,19 @@ module UPS
         recommendation['AddressLine']
       end
 
+      address2 = if recommendation['AddressLine'].kind_of? Array
+        recommendation['AddressLine'][1]
+      else
+        nil
+      end
+
       city = recommendation['PoliticalDivision2']
       state = recommendation['PoliticalDivision1']
       zip = recommendation['PostcodePrimaryLow']
       country = recommendation['CountryCode']
 
       super(:address1 => address1,
+            :address2 => address2,
             :city => city,
             :state => state,
             :zip => zip,
