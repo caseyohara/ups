@@ -19,9 +19,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_runtime_dependency "i18n"
-  gem.add_runtime_dependency "active_support", "~> 3.0.0"
-  gem.add_runtime_dependency "nokogiri", "~> 1.5.6"
-  gem.add_runtime_dependency "typhoeus", "~> 0.6.1"
+  gem.add_runtime_dependency "activesupport", ">= 3.0.0"
+  gem.add_runtime_dependency "nokogiri", ">= 1.5.6"
+  gem.add_runtime_dependency "typhoeus", ">= 0.6.1"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "guard", "1.4.0"
