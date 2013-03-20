@@ -26,6 +26,16 @@ def invalid_address
   address
 end
 
+def ambiguous_address_with_one_recommendation
+  UPS::Address.new({:address1 => "34442 S FAIRBANKS RD",
+                    :address2 => "",
+                    :city => "DRUMMOND ISLAND",
+                    :state => "MI",
+                    :zip => "49726",
+                    :country => "US"})
+end
+
+
 describe UPS::Address, '#valid?' do
   it "returns true when it is a valid address" do
     VCR.use_cassette :valid_address do
@@ -48,7 +58,7 @@ end
 
 
 describe UPS::Address, '#recommendations' do
-  it "returns recommended alternative addresses" do
+  it "returns many recommended alternative addresses" do
     VCR.use_cassette :ambiguous_address do
       recommended_address = ambiguous_address.recommendations[0]
       recommended_address.address1.should == "1285 AVENUE OF AMERICAS"
@@ -59,12 +69,17 @@ describe UPS::Address, '#recommendations' do
     end
   end
 
+  it "returns one recommended alternative addresses" do
+    VCR.use_cassette :ambiguous_address_with_one_recommendation do
+      ambiguous_address_with_one_recommendation.recommendations.length.should == 1
+    end
+  end
+
   it "returns empty when there are no recommendations" do
     VCR.use_cassette :valid_address do
       recommendations = valid_address.recommendations
       recommendations.should == []
     end
   end
-
 end
 

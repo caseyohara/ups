@@ -19,7 +19,8 @@ module UPS
 
     def recommendations
       return [] if valid?
-      response.fetch('AddressKeyFormat', []).map do |recommendation|
+      recommendations = [response.fetch('AddressKeyFormat', [])].flatten(1)
+      recommendations.map do |recommendation|
         RecommendedAddress.new(recommendation)
       end
     end
